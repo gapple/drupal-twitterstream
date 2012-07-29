@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function twitterstream_schema() {
+  $schema = array();
+
+  $schema['twitterstream_raw'] = array(
+    'description' => 'Raw tweet data consumed from the streaming API.',
+    'fields' => array(
+      'id' => array(
+        'description' => '',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE
+      ),
+      'data' => array(
+        'description' => 'Raw tweet data.',
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function twitterstream_install() {
+
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function twitterstream_uninstall() {
+
+}
