@@ -40,4 +40,14 @@ class TwitterstreamPublicConsumer extends Phirehose {
     $this->setTrack($track);
     $this->setFollow($follow);
   }
+
+  /**
+   * Pass log messages through to System_Daemon::log().
+   *
+   * @param string $message
+   * @param string $level
+   */
+  public function log($message, $level = 'notice') {
+    System_Daemon::log(System_Daemon::LOG_INFO, 'Phirehose: ' . $message);
+  }
 }
