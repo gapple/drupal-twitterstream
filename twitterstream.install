@@ -24,6 +24,25 @@ function twitterstream_schema() {
     'primary key' => array('id'),
   );
 
+  $schema['twitterstream_params'] = array(
+    'description' => 'Parameters for the stream consumer from each module.',
+    'fields' => array(
+      'module' => array(
+        'description' => 'Module that the parameters belong to.',
+        'type' => 'varchar',
+        'length' => '64',
+        'not null' => TRUE,
+      ),
+      'params' => array(
+        'description' => 'Serialized parameters array',
+        'type' => 'text',
+        'serialize' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('module'),
+  );
+
   return $schema;
 }
 

@@ -1,9 +1,94 @@
 <?php
 
 /**
+ * Implements hook_permission().
+ */
+function twitterstream_permission() {
+  return array(
+    'administer twitterstream' => array(
+      'title' => t('Administer Twitter Stream'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function twitterstream_menu() {
+  $items = array();
+
+  $items['admin/config/system/twitterstream'] = array(
+    'title' => 'Twitter Stream',
+    'description' => 'Configure Twitter Stream options.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('twitterstream_admin_settings'),
+    'access arguments' => array('administer twitterstream'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'twitterstream.pages.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Manually update a module's parameters for the streaming consumer.
+ *
+ * Data can be specified explicitly, or handed back to the module's
+ * hook_twitterstream_params() implementation.
+ *
+ * @param string $module
+ *   Name of the module to store updates for
+ * @param array $data
+ *   If provided, the specified data is stored for the module instead of
+ *   invoking that module's hook_twitterstream_params() implementation to
+ *   retrieve the data.  Passing null will remove the modules stored parameters.
+ */
+function twitterstream_update_params($module, $data = array()) {
+
+  if (empty($data) && $data !== null) {
+    $data = module_invoke($module, 'twitterstream_params');
+    $data = $data[$module];
+  }
+
+  if (is_array($data)) {
+    if (array_key_exists('track', $data) && empty($data['track'])) {
+      unset($data['track']);
+    }
+    if (array_key_exists('follow', $data) && empty($data['follow'])) {
+      unset($data['follow']);
+    }
+
+    if (empty($data)) {
+      $data = null;
+    }
+  }
+
+  if ($data === null) {
+    db_delete('twitterstream_params')
+      ->condition('module', $module)
+      ->execute();
+  }
+  else {
+    db_merge('twitterstream_params')
+      ->key(array('module' => $module))
+      ->fields(array(
+        'params' => serialize($data),
+      ))
+      ->execute();
+  }
+}
+
+/**
  * Implements hook_cron().
  */
 function twitterstream_cron() {
 
-}
+  // Allow modules to update their parameters.
+  $params = module_invoke_all('twitterstream_params');
+  foreach ($params as $module => $data) {
+    twitterstream_update_params($module, $data);
+    // TODO remove entries for modules that exist in database but don't return a value.
+  }
 
+  // TODO parse the raw tweet data and notify other modules
+}
