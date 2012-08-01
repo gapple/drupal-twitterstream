@@ -37,18 +37,35 @@ function twitterstream_admin_settings($form, &$form_state) {
     '#tree' => FALSE,
   );
 
+  $form['daemon']['twitterstream_status_period'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Minimum status update inverval'),
+    '#description' => t('Minimum period between writing status updates to the log file in seconds.<br>Default is 10 minutes.'),
+    '#size' => 5,
+    '#default_value' => variable_get('twitterstream_status_perdiod', 600),
+  );
+
+  $form['daemon']['twitterstream_filter_check'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Minimum filter check interval'),
+    '#description' => t('Minimum period between checking for changes to the filter parameters in seconds.<br>Filter changes will only be reflected in the stream at most every 2 minutes, even if the parameters are checked more frequently.<br>Default is 1 minute.'),
+    '#size' => 5,
+    '#default_value' => variable_get('twitterstream_filter_check', 60),
+  );
+
   $form['daemon']['twitterstream_daemon_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Daemon name'),
     '#size' => 16,
     '#maxlength' => 16,
     '#default_value' => variable_get('twitterstream_daemon_name', 'twitterstream'),
-    '#description' => t('App name of the daemon.  Only needs to be changed if running multiple instances on the same server.'),
+    '#description' => t('App name of the daemon.  Only needs to be changed if running multiple instances on the same server.<br>Default value is \'twitterstream\'.'),
   );
 
   $form['daemon']['twitterstream_daemon_user'] = array(
     '#type' => 'textfield',
     '#title' => t('Name of system user to run daemon as'),
+    '#description' => t('Default is the Ubuntu Apache user, \'www-data\'.'),
     '#size' => 20,
     '#default_value' => variable_get('twitterstream_daemon_user', 'www-data'),
   );

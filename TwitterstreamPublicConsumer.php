@@ -4,7 +4,32 @@
  * Consume tweet data from the Steaming API and store in the database.
  */
 class TwitterstreamPublicConsumer extends Phirehose {
+
   public $db = null;
+
+  /**
+   * Set the minimum period between writing status updates to the log.
+   *
+   * @param int $value
+   *   Number of seconds
+   */
+  public function setAvgPeriod($value = 60) {
+    $this->avgPeriod = $value;
+  }
+
+  /**
+   * Set the minimum period between checking for changes to the filter
+   * predicates.
+   *
+   * The stream is only updated at most every 120 seconds, even if this period
+   * is shorter.
+   *
+   * @param int $value
+   *   Number of seconds
+   */
+  public function setFilterCheckMin($value = 5) {
+    $this->filterCheckMin = $value;
+  }
 
   /**
    * Store the provided raw status to the database.

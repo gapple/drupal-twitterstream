@@ -57,22 +57,27 @@ System_Daemon::setOptions(array(
 // Since the database is opened in the parent process (required for
 // variable_get() to retrieve the daemon settings), it will be closed when the
 // parent process dies.  Close the connection so that the child process opens
-// a new one when needed for the first time.
+// it's own when needed for the first time.
 Database::closeConnection();
 
 
 System_Daemon::start();
 
-$consumer = new TwitterstreamPublicConsumer(
-    variable_get('twitterstream_username'),
-    variable_get('twitterstream_password'),
-    Phirehose::METHOD_FILTER
-  );
+{
+  $consumer = new TwitterstreamPublicConsumer(
+      variable_get('twitterstream_username'),
+      variable_get('twitterstream_password'),
+      Phirehose::METHOD_FILTER
+    );
 
-$consumer->db = Database::getConnection();
+  $consumer->db = Database::getConnection();
 
-$consumer->consume();
+  // Set updates to occur less frequently than the Phirehose defaults.
+  $consumer->setAvgPeriod(variable_get('twitterstream_status_period', 600));
+  $consumer->setFilterCheckMin(variable_get('twitterstream_filter_check', 60));
 
+  $consumer->consume();
+}
 
 System_Daemon::stop();
 
