@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 /**
  * A Daemon script to set up a Streaming API consumer.
