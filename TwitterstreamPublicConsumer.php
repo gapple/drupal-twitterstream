@@ -67,6 +67,40 @@ class TwitterstreamPublicConsumer extends Phirehose {
   }
 
   /**
+   * Connects to the stream URL using the configured method.
+   *
+   * Phirehose::connect() only attempts to resolve the IP address of the
+   * Streaming API endpoint once, so this method catches the exception and
+   * attempts to connect again after a delay.
+   *
+   * @throws ErrorException
+   *
+   * @see Phirehose::connect()
+   */
+  protected function connect() {
+    $networkFailures = 0;
+
+    while (true) {
+      try {
+        parent::connect();
+        return;
+      }
+      catch (PhirehoseNetworkException $ex) {
+
+        $networkFailures++;
+
+        if ($networkFailures >= 5) {
+          throw $ex;
+        }
+
+        $this->log($ex->getMessage());
+
+        sleep(pow(2, $networkFailures));
+      }
+    }
+  }
+
+  /**
    * Pass log messages through to System_Daemon::log().
    *
    * @param string $message
