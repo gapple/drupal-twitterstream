@@ -64,21 +64,20 @@ Database::closeConnection();
 
 System_Daemon::start();
 
-{
-  $consumer = new TwitterstreamPublicConsumer(
-      variable_get('twitterstream_username'),
-      variable_get('twitterstream_password'),
-      Phirehose::METHOD_FILTER
-    );
+$consumer = new TwitterstreamPublicConsumer(
+    variable_get('twitterstream_username'),
+    variable_get('twitterstream_password'),
+    Phirehose::METHOD_FILTER
+  );
 
-  $consumer->db = Database::getConnection();
+$consumer->db = Database::getConnection();
 
-  // Set updates to occur less frequently than the Phirehose defaults.
-  $consumer->setAvgPeriod(variable_get('twitterstream_status_period', 600));
-  $consumer->setFilterCheckMin(variable_get('twitterstream_filter_check', 60));
+// Set updates to occur less frequently than the Phirehose defaults.
+$consumer->setAvgPeriod(variable_get('twitterstream_status_period', 600));
+$consumer->setFilterCheckMin(variable_get('twitterstream_filter_check', 60));
 
+do {
   $consumer->consume();
-}
+} while (false); // TwitterstreamPublicConsumer has it's own loop
 
 System_Daemon::stop();
-
