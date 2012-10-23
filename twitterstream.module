@@ -89,6 +89,24 @@ function twitterstream_cron() {
     twitterstream_update_params($module, $data);
     // TODO remove entries for modules that exist in database but don't return a value.
   }
+}
 
-  // TODO parse the raw tweet data and notify other modules
+/**
+ * Implements hook_cron_queue_info().
+ */
+function twitterstream_cron_queue_info() {
+  $queues['twitterstream_process'] = array(
+    'worker callback' => 'twitterstream_queue_process',
+    'time' => 30,
+  );
+  return $queues;
+}
+
+/**
+ * Process a tweet JSON string stored in the queue.
+ */
+function twitterstream_queue_process($item) {
+  module_load_include('inc', 'twitter', 'twitter');
+
+  twitter_status_save(json_decode($item));
 }

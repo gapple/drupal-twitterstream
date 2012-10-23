@@ -6,24 +6,6 @@
 function twitterstream_schema() {
   $schema = array();
 
-  $schema['twitterstream_raw'] = array(
-    'description' => 'Raw tweet data consumed from the streaming API.',
-    'fields' => array(
-      'id' => array(
-        'description' => '',
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE
-      ),
-      'data' => array(
-        'description' => 'Raw tweet data.',
-        'type' => 'text',
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('id'),
-  );
-
   $schema['twitterstream_params'] = array(
     'description' => 'Parameters for the stream consumer from each module.',
     'fields' => array(
@@ -58,4 +40,21 @@ function twitterstream_install() {
  */
 function twitterstream_uninstall() {
 
+}
+
+/**
+ * Implementation of hook_requirements().
+ */
+function twitterstream_requirements($phase) {
+  $requirements = array();
+  switch ($phase) {
+    case 'runtime':
+      $requirements['twitterstream_queue'] = array(
+        'title' => t('Twitterstream Queue'),
+        'severity' => REQUIREMENT_INFO,
+        'value' => number_format(DrupalQueue::get('twitterstream_process')->numberOfItems()) . ' Tweets',
+      );
+      break;
+  }
+  return $requirements;
 }

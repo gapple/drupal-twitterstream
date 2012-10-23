@@ -30,17 +30,13 @@ class TwitterstreamPublicConsumer extends Phirehose {
   }
 
   /**
-   * Store the provided raw status to the database.
+   * Put the provided raw status in the processing queue.
    *
    * @see Phirehose::enqueueStatus()
    */
   public function enqueueStatus($status) {
-    Database::getConnection()->query(
-      "INSERT INTO {twitterstream_raw} SET data = :data",
-      array(
-        ':data' => $status
-      )
-    );
+    DrupalQueue::get('twitterstream_process')
+      ->createItem($status);
   }
 
   /**

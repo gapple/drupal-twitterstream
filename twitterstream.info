@@ -2,3 +2,5 @@ name = TwitterStream
 description = "Utility module for consuming Twitter streaming api."
 core = 7.x
 configure = admin/config/system/twitterstream
+
+dependencies[] = twitter
