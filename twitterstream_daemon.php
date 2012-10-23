@@ -70,8 +70,6 @@ $consumer = new TwitterstreamPublicConsumer(
     Phirehose::METHOD_FILTER
   );
 
-$consumer->db = Database::getConnection();
-
 // Set updates to occur less frequently than the Phirehose defaults.
 $consumer->setAvgPeriod(variable_get('twitterstream_status_period', 600));
 $consumer->setFilterCheckMin(variable_get('twitterstream_filter_check', 60));

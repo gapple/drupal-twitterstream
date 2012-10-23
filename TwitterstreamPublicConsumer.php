@@ -5,8 +5,6 @@
  */
 class TwitterstreamPublicConsumer extends Phirehose {
 
-  public $db = null;
-
   /**
    * Set the minimum period between writing status updates to the log.
    *
@@ -37,7 +35,12 @@ class TwitterstreamPublicConsumer extends Phirehose {
    * @see Phirehose::enqueueStatus()
    */
   public function enqueueStatus($status) {
-    $this->db->query("INSERT INTO {twitterstream_raw} SET data = :data", array(':data' => $status));
+    Database::getConnection()->query(
+      "INSERT INTO {twitterstream_raw} SET data = :data",
+      array(
+        ':data' => $status
+      )
+    );
   }
 
   /**
@@ -50,8 +53,7 @@ class TwitterstreamPublicConsumer extends Phirehose {
     $track = array();
     $follow = array();
 
-    // TODO can we prevent querying the database and rebuilding the full arrays each time?
-    $result = $this->db->query("SELECT module, params FROM {twitterstream_params}");
+    $result = Database::getConnection()->query("SELECT params FROM {twitterstream_params}");
     foreach ($result as $row) {
       $params = unserialize($row->params);
       if (!empty($params['track'])) {
