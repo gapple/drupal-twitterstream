@@ -9,10 +9,7 @@ if (php_sapi_name() != 'cli') {
   exit();
 }
 
-if (preg_match('<(.*)/sites/[^/]+/modules/twitterstream>', dirname(__FILE__), $drupal_root)) {
-  $drupal_root = $drupal_root[1];
-}
-else if (preg_match('<(.*)/profiles/[^/]+/modules/twitterstream>', dirname(__FILE__), $drupal_root)) {
+if (preg_match('<(.*)/(sites|profiles)/>', dirname(__FILE__), $drupal_root)) {
   $drupal_root = $drupal_root[1];
 }
 else {
