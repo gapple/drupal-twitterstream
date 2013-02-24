@@ -5,6 +5,39 @@
  */
 class TwitterstreamPublicConsumer extends Phirehose {
 
+  protected $consumer;
+  protected $token;
+
+  protected $signatureMethod;
+
+  /**
+   * Create a new Streaming API consumer.
+   */
+  public function __construct() {
+    $this->signatureMethod = new OAuthSignatureMethod_HMAC_SHA1();
+
+    parent::__construct(null, null, Phirehose::METHOD_FILTER);
+  }
+
+  /**
+   * Set the application consumer key and secret for OAuth access.
+   * @param string $key
+   * @param string $secret
+   */
+  public function setConsumerKey($key, $secret) {
+    $this->consumer = new OAuthConsumer($key, $secret);
+  }
+
+  /**
+   * Set the Twitter account token and secret for OAuth access.
+   *
+   * @param string $token
+   * @param string $secret
+   */
+  public function setAccessToken($token, $secret) {
+    $this->token = new OAuthConsumer($token, $secret);
+  }
+
   /**
    * Set the minimum period between writing status updates to the log.
    *
@@ -96,6 +129,28 @@ class TwitterstreamPublicConsumer extends Phirehose {
         sleep(pow(2, $networkFailures));
       }
     }
+  }
+
+  protected function getAuthorizationHeader() {
+    $url = self::URL_BASE . $this->method . '.' . $this->format;
+
+    // Setup params appropriately
+    $requestParams = array('delimited' => 'length');
+
+    // Filter takes additional parameters
+    if (count($this->trackWords) > 0) {
+      $requestParams['track'] = implode(',', $this->trackWords);
+    }
+    if (count($this->followIds) > 0) {
+      $requestParams['follow'] = implode(',', $this->followIds);
+    }
+
+    $request = OAuthRequest::from_consumer_and_token($this->consumer, $this->token, 'POST', $url, $requestParams);
+    $request->sign_request($this->signatureMethod, $this->consumer, $this->token);
+
+    $header = $request->to_header();
+    // Strip off "Authorization: ", since Phirehose prepends it itself.
+    return substr($header, 15);
   }
 
   /**

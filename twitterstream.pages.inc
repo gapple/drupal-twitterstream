@@ -16,20 +16,13 @@ function twitterstream_admin_settings($form, &$form_state) {
     '#tree' => FALSE,
   );
 
-  $form['auth']['twitterstream_username'] = array(
+  $form['auth']['twitterstream_account'] = array(
     '#type' => 'textfield',
-    '#title' => t('Account Username'),
+    '#title' => t('Twitter Account'),
     '#size' => 20,
-    '#default_value' => variable_get('twitterstream_username', ''),
+    '#default_value' => variable_get('twitterstream_account', ''),
+    '#description' => 'Twitter account name or id to access Streaming API with. Must be authorized through Twitter module settings. ',
   );
-
-  $form['auth']['twitterstream_password'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Account Password'),
-    '#size' => 20,
-    '#default_value' => variable_get('twitterstream_password', ''),
-  );
-
 
   $form['daemon'] = array(
     '#type' => 'fieldset',
