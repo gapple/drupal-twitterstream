@@ -21,7 +21,12 @@ function twitterstream_admin_settings($form, &$form_state) {
     '#title' => t('Twitter Account'),
     '#size' => 20,
     '#default_value' => variable_get('twitterstream_account', ''),
-    '#description' => 'Twitter account name or id to access Streaming API with. Must be authorized through Twitter module settings. ',
+    '#description' => t('Twitter account name or id to access Streaming API with. Must be authorized through the <a href="@url">Twitter module settings</a>.',
+      array(
+        '@url' => url('admin/config/services/twitter'),
+      )
+    ),
+    '#element_validate' => array('_twitterstream_element_validate_account_authenticated'),
   );
 
   $form['daemon'] = array(

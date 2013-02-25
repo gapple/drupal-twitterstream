@@ -110,3 +110,18 @@ function twitterstream_queue_process($item) {
 
   twitter_status_save(json_decode($item));
 }
+
+/**
+ * Validate that a form field contains a Twitter user account that has been
+ * authenticated through Twitter module.
+ */
+function _twitterstream_element_validate_account_authenticated($element, &$form_state, $form) {
+  module_load_include('inc', 'twitter');
+
+  if (!empty($element['#value'])) {
+    $account = twitter_account_load($element['#value']);
+    if (empty($account) || !$account->is_auth()) {
+      form_error($element, t('The provided account must be authenticated.'));
+    }
+  }
+}
