@@ -39,7 +39,12 @@ function twitterstream_install() {
  * Implements hook_uninstall().
  */
 function twitterstream_uninstall() {
-
+  variable_del('twitterstream_account');
+  variable_del('twitterstream_status_period');
+  variable_del('twitterstream_filter_check');
+  variable_del('twitterstream_daemon_name');
+  variable_del('twitterstream_daemon_user');
+  variable_del('twitterstream_daemon_group');
 }
 
 /**
@@ -57,4 +62,28 @@ function twitterstream_requirements($phase) {
       break;
   }
   return $requirements;
+}
+
+/**
+ * Change stored account from username+password to account for oauth.
+ */
+function twitterstream_update_7101() {
+  $accountName = variable_get('twitterstream_username');
+  if (!empty($accountName)) {
+    variable_set('twitterstream_account', $accountName);
+
+    module_load_include('inc', 'twitter');
+
+    $account = twitter_account_load($accountName);
+    if (empty($account) || !$account->is_auth()) {
+      drupal_set_message(t('The Twitterstream account needs to  be authorized through the <a href="@url">Twitter module settings</a>.',
+        array(
+          '@url' => url('admin/config/services/twitter'),
+        )
+      ), 'warning');
+    }
+  }
+
+  variable_del('twitterstream_username');
+  variable_del('twitterstream_password');
 }
