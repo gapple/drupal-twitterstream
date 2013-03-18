@@ -1,0 +1,136 @@
+<?php
+/**
+ * Implements hook_permission().
+ */
+function twitterstreamstatic_permission() {
+  return array(
+      'configure twitterstreamstatic' => array(
+          'title' => t('Change TwitterStream Static settings'),
+      ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function twitterstreamstatic_menu() {
+  $items = array();
+
+  $items['admin/config/services/twitterstreamstatic'] = array(
+      'title' => 'Twitter Stream Static Configuration',
+      'description' => 'Set static items for TwitterStream to listen to.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('twitterstreamstatic_settings_form'),
+      'access arguments' => array('configure twitterstreamstatic'),
+      'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Form for module settings.
+ */
+function twitterstreamstatic_settings_form($form, &$form_state) {
+  $form = array();
+
+  $form['twitterstreamstatic_follow'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Accounts'),
+    '#description' => t('Enter Twitter account names or ids to follow, separated by a new line.'),
+    '#default_value' => variable_get('twitterstreamstatic_follow', ''),
+  );
+  $form['twitterstreamstatic_track'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Hashtags and Terms'),
+    '#description' => t('Enter hashtags or phrases to track, separated by a new line.'),
+    '#default_value' => variable_get('twitterstreamstatic_track', ''),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function twitterstreamstatic_form_twitterstreamstatic_settings_form_alter(&$form, &$form_state) {
+  // Append default submit handler after system_settings_form_submit().
+  $form['#submit'][] = 'twitterstreamstatic_settings_form_submit';
+}
+
+function twitterstreamstatic_settings_form_validate($form, &$form_state) {
+  // Check that accounts are in a valid format (no spaces or special characters)
+  $follow = preg_split('<\s*\r?\n\s*?>', trim($form_state['values']['twitterstreamstatic_follow']));
+  $invalid_follow = array();
+  foreach ($follow as $key => $account) {
+    if (!preg_match('<^(\d+|@?\w+)$>', $account)) {
+      $invalid_follow[] = check_plain($account);
+    }
+  }
+  if (!empty($invalid_follow)) {
+    form_set_error('twitterstreamstatic_follow',
+      t('The following accounts are invalid: "!accounts"', array(
+        '!accounts' => implode('", "', $invalid_follow)
+      ))
+    );
+  }
+}
+
+function twitterstreamstatic_settings_form_submit($form, &$form_state) {
+  // Force immediate update of parameters. Must be called after
+  // system_settings_form_submit() to be effective.
+  twitterstream_update_params('twitterstreamstatic');
+}
+
+/**
+ * Implementation of hook_twitterstream_params().
+ */
+function twitterstreamstatic_twitterstream_params() {
+  module_load_include('inc', 'twitter');
+
+  $account_map_cache = cache_get('twitterstreamstatic_account_map');
+  if ($account_map_cache) {
+    $account_map = $account_map_cache->data;
+  }
+  else {
+    $account_map = array();
+  }
+  $account_map_updated = false;
+
+  $twitter_connection = twitter_connect(twitter_account_load(variable_get('twitterstream_account', '')));
+
+
+  $follow = preg_split('<\s*\r?\n\s*?>', trim(variable_get('twitterstreamstatic_follow', '')));
+  foreach ($follow as $key => $account) {
+    if (preg_match('<^\d+$>', $account)) {
+      $follow[$key] = intval($account);
+    }
+    else {
+      // Convert account names into IDs.
+      $account = preg_replace('<^@>', '', $account);
+      if (array_key_exists($account, $account_map)) {
+        $follow[$key] = $account_map[$account];
+      }
+      else {
+        $account_data = $twitter_connection->users_show($account, FALSE);
+        $follow[$key] = $account_data->id;
+        $account_map[$account] = $account_data->id;
+        $account_map_updated = true;
+      }
+    }
+  }
+
+  if ($account_map_updated) {
+    cache_set('twitterstreamstatic_account_map', $account_map);
+  }
+
+
+  $track = preg_split('<\s*\r?\n\s*>', trim(variable_get('twitterstreamstatic_track', '')));
+
+  return array(
+    'twitterstreamstatic' => array(
+      'follow' => $follow,
+      'track' => $track,
+    )
+  );
+}

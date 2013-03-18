@@ -17,9 +17,9 @@ function twitterstream_permission() {
 function twitterstream_menu() {
   $items = array();
 
-  $items['admin/config/system/twitterstream'] = array(
+  $items['admin/config/services/twitterstream'] = array(
     'title' => 'Twitter Stream',
-    'description' => 'Configure Twitter Stream options.',
+    'description' => 'Configure Twitter Stream Daemon options.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('twitterstream_admin_settings'),
     'access arguments' => array('administer twitterstream'),

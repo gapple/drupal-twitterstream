@@ -1,0 +1,7 @@
+name = TwitterStream Static
+description = "A simple module for setting static values for TwitterStream to track"
+core = 7.x
+configure = admin/config/services/twitterstream/static
+
+dependencies[] = twitter
+dependencies[] = twitterstream
