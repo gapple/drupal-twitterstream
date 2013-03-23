@@ -79,6 +79,10 @@ class TwitterstreamPublicConsumer extends Phirehose {
    */
   public function checkFilterPredicates() {
 
+    // TODO Connecting to the Streaming API will fail if neither parameter is
+    // specified (causing the daemon to exit after several retries), so sleep
+    // and check again if nothing is available?
+
     $track = array();
     $follow = array();
 

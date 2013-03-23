@@ -60,6 +60,7 @@ function twitterstreamstatic_form_twitterstreamstatic_settings_form_alter(&$form
 
 function twitterstreamstatic_settings_form_validate($form, &$form_state) {
   // Check that accounts are in a valid format (no spaces or special characters)
+  // TODO currently this doesn't allow leaving either field empty.
   $follow = preg_split('<\s*\r?\n\s*?>', trim($form_state['values']['twitterstreamstatic_follow']));
   $invalid_follow = array();
   foreach ($follow as $key => $account) {
