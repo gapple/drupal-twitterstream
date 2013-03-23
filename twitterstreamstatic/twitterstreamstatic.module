@@ -101,20 +101,21 @@ function twitterstreamstatic_twitterstream_params() {
   $twitter_connection = twitter_connect(twitter_account_load(variable_get('twitterstream_account', '')));
 
 
-  $follow = preg_split('<\s*\r?\n\s*?>', trim(variable_get('twitterstreamstatic_follow', '')));
-  foreach ($follow as $key => $account) {
+  $_follow = preg_split('<\s*\r?\n\s*?>', trim(variable_get('twitterstreamstatic_follow', '')));
+  $follow = array();
+  foreach ($_follow as $key => $account) {
     if (preg_match('<^\d+$>', $account)) {
-      $follow[$key] = intval($account);
+      $follow[] = intval($account);
     }
     else {
       // Convert account names into IDs.
-      $account = preg_replace('<^@>', '', $account);
       if (array_key_exists($account, $account_map)) {
-        $follow[$key] = $account_map[$account];
+        $follow[$account] = $account_map[$account];
       }
       else {
-        $account_data = $twitter_connection->users_show($account, FALSE);
-        $follow[$key] = $account_data->id;
+        $account_text = preg_replace('<^@>', '', $account);
+        $account_data = $twitter_connection->users_show($account_text, FALSE);
+        $follow[$account] = $account_data->id;
         $account_map[$account] = $account_data->id;
         $account_map_updated = true;
       }
