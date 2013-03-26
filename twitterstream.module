@@ -160,7 +160,12 @@ function twitterstream_account_id_from_name($account) {
       }
     }
 
-    $account_data = $twitter_connection->users_show($account_lookup, FALSE);
+    try {
+      $account_data = $twitter_connection->users_show($account_lookup, FALSE);
+    }
+    catch (TwitterException $e) {
+
+    }
 
     if (!empty($account_data->id)) {
       $account_map[$account_lookup] = $account_data->id;
