@@ -135,7 +135,7 @@ function _twitterstream_element_validate_account_authenticated($element, &$form_
  *
  * @return The account ID or NULL if the lookup fails.
  */
-function twitterstream_account_id_from_name($account_name) {
+function twitterstream_account_id_from_name($account) {
   static $twitter_connection = NULL;
 
   $account_map_cache = cache_get('twitterstream_account_map');
