@@ -89,50 +89,23 @@ function twitterstreamstatic_settings_form_submit($form, &$form_state) {
 function twitterstreamstatic_twitterstream_params() {
   module_load_include('inc', 'twitter');
 
-  $account_map_cache = cache_get('twitterstreamstatic_account_map');
-  if ($account_map_cache) {
-    $account_map = $account_map_cache->data;
-  }
-  else {
-    $account_map = array();
-  }
-  $account_map_updated = false;
-
-  $twitter_connection = twitter_connect(twitter_account_load(variable_get('twitterstream_account', '')));
-
-
   $_follow = preg_split('<\s*\r?\n\s*?>', trim(variable_get('twitterstreamstatic_follow', '')));
   $follow = array();
-  foreach ($_follow as $key => $account) {
+  foreach ($_follow as $account) {
     if (preg_match('<^\d+$>', $account)) {
       $follow[] = intval($account);
     }
     else {
-      // Convert account names into IDs.
-      if (array_key_exists($account, $account_map)) {
-        $follow[$account] = $account_map[$account];
-      }
-      else {
-        $account_text = preg_replace('<^@>', '', $account);
-        $account_data = $twitter_connection->users_show($account_text, FALSE);
-        $follow[$account] = $account_data->id;
-        $account_map[$account] = $account_data->id;
-        $account_map_updated = true;
+      $account_id = twitterstream_account_id_from_name($account);
+      if (!empty($account_id)) {
+        $follow[$account] = $account_id;
       }
     }
   }
 
-  if ($account_map_updated) {
-    cache_set('twitterstreamstatic_account_map', $account_map);
-  }
-
-
   $track = preg_split('<\s*\r?\n\s*>', trim(variable_get('twitterstreamstatic_track', '')));
 
   return array(
-    'twitterstreamstatic' => array(
-      'follow' => $follow,
-      'track' => $track,
-    )
+    'twitterstreamstatic' => compact('follow','track')
   );
 }

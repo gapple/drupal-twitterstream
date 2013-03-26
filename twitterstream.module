@@ -125,3 +125,52 @@ function _twitterstream_element_validate_account_authenticated($element, &$form_
     }
   }
 }
+
+/**
+ * Get the account id for a specified twitter username.
+ *
+ * @param $account_name
+ *  The Twitter account name to retrieve an ID for, optionally prepended with
+ *  an '@'.
+ *
+ * @return The account ID or NULL if the lookup fails.
+ */
+function twitterstream_account_id_from_name($account_name) {
+  static $twitter_connection = NULL;
+
+  $account_map_cache = cache_get('twitterstream_account_map');
+  if ($account_map_cache) {
+    $account_map = $account_map_cache->data;
+  }
+  else {
+    $account_map = array();
+  }
+
+  $account_lookup = preg_replace('<^@>', '', $account);
+
+  if (!array_key_exists($account_lookup, $account_map)) {
+    if (is_null($twitter_connection)) {
+      $twitter_account = twitter_account_load(variable_get('twitterstream_account', ''));
+      if (!empty($twitter_account)) {
+        $twitter_connection = twitter_connect($twitter_account);
+      }
+
+      if (empty($twitter_connection)) {
+        return NULL;
+      }
+    }
+
+    $account_data = $twitter_connection->users_show($account_lookup, FALSE);
+
+    if (!empty($account_data->id)) {
+      $account_map[$account_lookup] = $account_data->id;
+    }
+    else {
+      $account_map[$account_lookup] = NULL;
+    }
+
+    cache_set('twitterstream_account_map', $account_map);
+  }
+
+  return $account_map[$account_lookup];
+}
